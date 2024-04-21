@@ -14,6 +14,8 @@ function jsonToEvent( info ) {
     res.startTime = startDate;
     res.endTime = endDate;
     res.description = page;
+    res.allDay = false;
+    
     return res;
 
 }

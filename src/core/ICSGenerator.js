@@ -1,8 +1,15 @@
 import * as ics from 'ics';
 
-function timeToArray( date ) {
+function timeToArray( date, includeTime ) {
 
-    return [ date.getFullYear(), date.getMonth() + 1, date.getDate() ];
+    const res = [ date.getFullYear(), date.getMonth() + 1, date.getDate() ];
+    if ( includeTime ) {
+
+        res.push( date.getHours(), date.getMinutes() );
+
+    }
+
+    return res;
 
 }
 
@@ -17,13 +24,17 @@ export class ICSGenerator {
                 title: e.subject,
                 description: e.description,
                 location: e.location,
-                start: timeToArray( e.startTime ),
 
             };
 
-            if ( ! info.allDay ) {
+            if ( info.allDay ) {
 
-                info.end = timeToArray( e.endTime );
+                info.start = timeToArray( e.startTime );
+
+            } else {
+
+                info.start = timeToArray( e.startTime, true );
+                info.end = timeToArray( e.endTime, true );
 
             }
 
