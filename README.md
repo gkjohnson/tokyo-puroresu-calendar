@@ -1,4 +1,4 @@
-# プロレス-calendar
+# 東京-プロレス-calendar
 
 プロレス Event Calender generated from [DDT Pro Wrestling](https://www.ddtpro.com/schedules) which includes TJPW, DDT, and [Noah](https://www.noah.co.jp/schedule/) pro wrestling events.
 
