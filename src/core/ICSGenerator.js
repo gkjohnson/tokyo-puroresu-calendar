@@ -12,7 +12,7 @@ export class ICSGenerator {
 
         const icsEvents = events.map( e => {
 
-            return {
+            const info = {
 
                 title: e.subject,
                 description: e.description,
@@ -20,6 +20,14 @@ export class ICSGenerator {
                 start: timeToArray( e.startTime ),
 
             };
+
+            if ( ! info.allDay ) {
+
+                info.end = timeToArray( e.endTime );
+
+            }
+
+            return info;
 
         } );
 
@@ -40,7 +48,6 @@ export class ICSGenerator {
             } );
 
         } );
-
 
     }
 
