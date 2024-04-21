@@ -7,10 +7,10 @@ function jsonToEvent( info ) {
     const page = `https://www.ddtpro.com/schedules/${ article_id }`;
     const startDate = new Date( timestamp * 1e3 );
     const endDate = new Date( timestamp * 1e3 );
-    endDate.setHours( startTime.getHours() + 3 );
+    endDate.setHours( startDate.getHours() + 3 );
 
     const res = new CalendarEvent();
-    res.subject = `${ team_id.toUppercase() }: ${ title }`;
+    res.subject = `${ team_id.toUpperCase() }: ${ title }`;
     res.startTime = startDate;
     res.endTime = endDate;
     res.description = page;
@@ -30,7 +30,7 @@ export class DDTLoader {
             date.setMonth( now.getMonth() + i );
     
             const year = date.getFullYear().toString();
-            const month = ( date.getMonth() + 1 ).padStart( 2, '0' );
+            const month = ( date.getMonth() + 1 ).toString().padStart( 2, '0' );
             const request = await fetch( `https://api.ddtpro.com/schedules?yyyymm=${ year }${ month }` );
             const json = await request.json();
             events.push( ...json.list );
@@ -38,8 +38,8 @@ export class DDTLoader {
         }
 
         return events
-            .filter( e => e.category.type !== 'schedules' )
-            .map( jsonToEvent( e ) );
+            .filter( e => e.category.type === 'schedules' )
+            .map( e => jsonToEvent( e ) );
 
     }
 
