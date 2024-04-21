@@ -1,4 +1,4 @@
-# puroresu-calendar
+# プロレス-calendar
 
 プロレス Event Calender generated from [DDT Pro Wrestling](https://www.ddtpro.com/schedules) and [Noah Pro Wrestling](https://www.noah.co.jp/schedule/) websites.
 
