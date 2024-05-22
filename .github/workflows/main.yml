@@ -33,6 +33,6 @@ jobs:
     - name: Commit Calendar
       uses: EndBug/add-and-commit@v7
       with:
-        add: 'TSC_EVENTS.ics'
+        add: 'DDT_EVENTS.ics'
         message: 'update calendar'
         push: 'origin main --force'
