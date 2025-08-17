@@ -1,16 +1,34 @@
-import { CalendarEvent } from '../core/CalendarEvent.js'
+import puppeteer from 'puppeteer';
+import { CalendarEvent } from '../core/CalendarEvent.js';
+
+function createWaitHandle() {
+
+    let resolve, reject;
+    const promise = new Promise( ( _resolve, _reject ) => {
+
+        resolve = _resolve;
+        reject = _reject;
+
+    } );
+
+    promise.resolve = resolve;
+    promise.reject = reject;
+
+    return promise;
+
+}
 
 function jsonToEvent( info ) {
     
-    const { article_id, team_id, timestamp, title } = info;
+    const { entryId, startTime, title } = info;
 
-    const page = `https://www.ddtpro.com/schedules/${ article_id }`;
-    const startDate = new Date( timestamp * 1e3 );
-    const endDate = new Date( timestamp * 1e3 );
+    const page = `https://www.ddtpro.com/schedules/${ entryId }`;
+    const startDate = new Date( startTime );
+    const endDate = new Date( startTime );
     endDate.setHours( startDate.getHours() + 3 );
 
     const res = new CalendarEvent();
-    res.subject = `${ team_id.toUpperCase() }: ${ title }`;
+    res.subject = title;
     res.startTime = startDate;
     res.endTime = endDate;
     res.description = page;
@@ -22,26 +40,68 @@ function jsonToEvent( info ) {
 
 export class DDTLoader {
 
-    async load() {
+    async load( pages = 3 ) {
 
-        const now = new Date();
-        let events = [];
-        for ( let i = - 2; i < 4; i ++ ) {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
 
-            const date = new Date();
-            date.setMonth( now.getMonth() + i );
-    
-            const year = date.getFullYear().toString();
-            const month = ( date.getMonth() + 1 ).toString().padStart( 2, '0' );
-            const request = await fetch( `https://api.ddtpro.com/schedules?yyyymm=${ year }${ month }` );
-            const json = await request.json();
-            events.push( ...json.list );
+        const events = [];
+        return new Promise( async resolve => {
 
-        }
+            let waitHandle = null;
+            page.on( 'response', async res => {
 
-        return events
-            .filter( e => e.category.type === 'schedules' )
-            .map( e => jsonToEvent( e ) );
+                if ( /\/ja$/.test( res.url() ) && res.request().method() === 'POST' ) {
+
+                    const content = JSON.parse( res.request().postData() );
+                    if ( content.operationName === 'listEvents' ) {
+
+                        const json = await res.json();
+                        events.push( ...json.data.listEvents.data );
+
+                        waitHandle.resolve();
+
+                    }
+
+                }
+
+            } );
+
+            let date = new Date();
+            date.setDate( 15 );
+            for ( let i = 0; i < pages; i ++ ) {
+
+                const m = date.getMonth().toString().padStart( 2, '0' );
+                const y = date.getFullYear();
+
+                waitHandle = createWaitHandle();
+                page.goto( `https://www.ddtpro.jp/schedules?date=${ y }${ m }`, {
+                    waitUntil: 'domcontentloaded',
+                    timeout: 5000
+                } );
+
+                await waitHandle;
+
+                date.setTime( date.getTime() + 30 * 24 * 60 * 60 * 1000 );
+
+            }
+
+
+            resolve();
+
+        } ).then( () => {
+
+            return page.close();
+
+        } ).then( () => {
+
+            return browser.close();
+
+        } ).then( () => {
+
+            return events.map( e => jsonToEvent( e ) );
+
+        } );
 
     }
 

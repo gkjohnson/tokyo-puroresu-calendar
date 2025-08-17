@@ -18,6 +18,7 @@
   "homepage": "https://github.com/gkjohnson/tokyo-sake-calendar#readme",
   "dependencies": {
     "ics": "^3.2.0",
-    "jsdom": "^24.0.0"
+    "jsdom": "^24.0.0",
+    "puppeteer": "^24.16.2"
   }
 }

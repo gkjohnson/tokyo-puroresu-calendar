@@ -1,5 +1,5 @@
 import { ICSGenerator } from './core/ICSGenerator.js';
-import { DDTLoader } from './tsc/DDTLoader.js';
+import { DDTLoader } from './tsc/DDTLoader2.js';
 
 ( async () => {
 
