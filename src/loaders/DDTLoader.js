@@ -18,20 +18,28 @@ function createWaitHandle() {
 
 }
 
-function jsonToEvent( info ) {
-    
-    const { entryId, startTime, title } = info;
+function capitalizeFirstLetter( val ) {
 
-    const page = `https://www.ddtpro.com/schedules/${ entryId }`;
+    return String( val ).charAt( 0 ).toUpperCase() + String( val ).slice( 1 );
+
+}
+
+function jsonToEvent( info, urlBase, prefix ) {
+    
+    const { entryId, startTime, title, typeData, location } = info;
+
+    const page = `${ urlBase }/${ entryId }`;
     const startDate = new Date( startTime );
     const endDate = new Date( startTime );
     endDate.setHours( startDate.getHours() + 3 );
 
+    const type = capitalizeFirstLetter( info.type );
     const res = new CalendarEvent();
-    res.subject = title;
+    res.subject = `${ prefix } ${ type }: ${ title }`;
     res.startTime = startDate;
     res.endTime = endDate;
     res.description = page;
+    res.location = typeData?.venue || location;
     res.allDay = false;
     
     return res;
@@ -40,10 +48,20 @@ function jsonToEvent( info ) {
 
 export class DDTLoader {
 
+    constructor( url = 'https://www.ddtpro.com/schedules', prefix = 'DDT' ) {
+
+        this.url = url;
+        this.prefix = prefix;
+
+    }
+
     async load( pages = 3 ) {
 
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch( { args: [ '--lang=en-US' ] } );
         const page = await browser.newPage();
+        await page.emulateTimezone( 'Asia/Tokyo' );
+
+        const { url, prefix } = this;
 
         const events = [];
         return new Promise( async resolve => {
@@ -75,7 +93,7 @@ export class DDTLoader {
                 const y = date.getFullYear();
 
                 waitHandle = createWaitHandle();
-                page.goto( `https://www.ddtpro.jp/schedules?date=${ y }${ m }`, {
+                page.goto( `${ url }?date=${ y }${ m }`, {
                     waitUntil: 'domcontentloaded',
                     timeout: 5000
                 } );
@@ -85,7 +103,6 @@ export class DDTLoader {
                 date.setTime( date.getTime() + 30 * 24 * 60 * 60 * 1000 );
 
             }
-
 
             resolve();
 
@@ -99,7 +116,7 @@ export class DDTLoader {
 
         } ).then( () => {
 
-            return events.map( e => jsonToEvent( e ) );
+            return events.map( e => jsonToEvent( e, url, prefix ) );
 
         } );
 
