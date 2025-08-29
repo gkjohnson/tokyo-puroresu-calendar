@@ -48,7 +48,7 @@ function jsonToEvent( info, urlBase, prefix ) {
 
 export class DDTLoader {
 
-    constructor( url = 'https://www.ddtpro.com/schedules', prefix = 'DDT' ) {
+    constructor( url = 'https://www.ddtpro.jp/schedules', prefix = 'DDT' ) {
 
         this.url = url;
         this.prefix = prefix;
