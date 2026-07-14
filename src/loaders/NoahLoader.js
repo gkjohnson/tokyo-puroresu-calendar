@@ -3,8 +3,15 @@ import { CalendarEvent } from '../core/CalendarEvent.js';
 
 function jsonToEvent( info, prefix ) {
     
-    const { schedule, opening, url, title, venue } = info;
+    const { schedule, url, title, venue } = info;
+    const matches = info.opening.trim().match( /([\d:]+)/ );
+    if ( ! matches ) {
 
+        return null;
+
+    }
+
+    const opening = matches[ 1 ];
     const startDate = new Date( `${ schedule } ${ opening }` );
     const endDate = new Date( `${ schedule } ${ opening }` );
     endDate.setHours( startDate.getHours() + 3 );
@@ -82,7 +89,7 @@ export class NoahLoader {
 
         } ).then( () => {
 
-            return events.map( e => jsonToEvent( e, prefix ) );
+            return events.map( e => jsonToEvent( e, prefix ) ).filter( e => e );
 
         } );
 
